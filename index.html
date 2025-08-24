@@ -41,14 +41,46 @@
     <p class="text-gray-600">Card Content</p>
   </div>
 </div>
-<button id="myButton" class="bg-purple-600 text-white px-2 rounded-md shadow-md hover:bg-purple-700 active:bg-purple-800 transition">
-  Click Me
+<button id="rippleBtn" class="relative overflow-hidden bg-blue-600 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-700 transition">
+  Ripple Button
 </button>
+
 <script>
-  document.getElementById('myButton').addEventListener('click',function(){
-alert('button clicked!');
+  const rippleBtn = document.getElementById("rippleBtn");
+
+  rippleBtn.addEventListener("click", function (e) {
+    const circle = document.createElement("span");
+    const diameter = Math.max(this.clientWidth, this.clientHeight);
+    const radius = diameter / 2;
+
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.clientX - this.offsetLeft - radius}px`;
+    circle.style.top = `${e.clientY - this.offsetTop - radius}px`;
+    circle.classList.add("ripple");
+
+    this.appendChild(circle);
+
+    setTimeout(() => circle.remove(), 600);
   });
 </script>
+
+<style>
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+  }
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+</style>
+
 </body>
 
 </html>
