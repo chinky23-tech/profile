@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon 3D Card with Bubbles</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: #0f0f0f;
+      overflow: hidden;
+    }
+
+    /* Bubble Background */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(0, 255, 255, 0.3);
+      animation: float 10s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-100vh); opacity: 0; }
+    }
+
+    /* Card Glow */
+    .glow-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+      transition: transform 0.5s ease, box-shadow 0.5s ease;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    .glow-card:hover {
+      transform: rotateY(15deg) rotateX(10deg) scale(1.05);
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+    }
+
+    /* Glowing Text */
+    .glow-text {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; }
+      to { text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff; }
+    }
+
+    /* Hidden Content */
+    .hidden-content {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
+      color: #00ffff;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .glow-card:hover .hidden-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="flex justify-center items-center h-screen relative">
+
+  <!-- Bubble Background -->
+  <div id="bubbles"></div>
+
+  <!-- Neon Card -->
+  <div class="glow-card w-80 h-60 rounded-2xl flex flex-col justify-center items-center cursor-pointer">
+    <div class="glow-text">Hover Me</div>
+    <p class="hidden-content mt-4">Cool 3D Neon Effect with Glow & Animation!</p>
+  </div>
+
+  <script>
+    // Generate Random Bubbles
+    const bubbleContainer = document.getElementById('bubbles');
+    for (let i = 0; i < 20; i++) {
+      let bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+      bubble.style.width = bubble.style.height = Math.random() * 30 + 10 + 'px';
+      bubble.style.left = Math.random() * window.innerWidth + 'px';
+      bubble.style.bottom = '-50px';
+      bubble.style.animationDuration = Math.random() * 10 + 5 + 's';
+      bubbleContainer.appendChild(bubble);
+    }
+  </script>
+
+</body>
+</html>
