@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Button Lab – Step by Step</title>
+
+
+<link href="./output.css" rel="stylesheet" />   
+  <!-- GSAP for subtle micro-interactions -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    /* Step 3: Neon hover helper (kept tiny & reusable) */
+    .neon-hover {
+      transition: box-shadow 220ms ease, transform 220ms ease;
+    }
+    .neon-hover:hover {
+      /* cyan + violet neon-ish combo */
+      box-shadow:
+        0 0 10px rgba(34,211,238,.8),
+        0 0 20px rgba(167,139,250,.7),
+        0 0 40px rgba(34,211,238,.4);
+      transform: translateY(-1px);
+    }
+
+    /* Step 4: Ripple effect */
+    .ripple-root { position: relative; overflow: hidden; }
+    .ripple-ink {
+      position: absolute; pointer-events:none; border-radius:9999px;
+      transform: translate(-50%,-50%) scale(0);
+      background: rgba(255,255,255,.55);
+      animation: ripple 600ms ease-out forwards;
+    }
+    @keyframes ripple {
+      to { transform: translate(-50%,-50%) scale(4); opacity: 0; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300">
+  <div class="mx-auto max-w-3xl p-6">
+    <!-- Header / Controls -->
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-xl sm:text-2xl font-semibold">Button Lab – Step by Step</h1>
+
+      <button id="toggleTheme"
+        class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700
+               hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        Toggle Dark / Light
+      </button>
+    </div>
+
+    <!-- Step selector -->
+    <fieldset class="mb-6 grid grid-cols-2 sm:flex sm:items-center gap-3">
+      <legend class="sr-only">Choose step</legend>
+      <label class="inline-flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="step" value="1" class="peer" checked />
+        <span class="px-3 py-1 rounded border border-slate-300 dark:border-slate-700 peer-checked:bg-slate-200 dark:peer-checked:bg-slate-800">Step 1</span>
+      </label>
+      <label class="inline-flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="step" value="2" class="peer" />
+        <span class="px-3 py-1 rounded border border-slate-300 dark:border-slate-700 peer-checked:bg-slate-200 dark:peer-checked:bg-slate-800">Step 2</span>
+      </label>
+      <label class="inline-flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="step" value="3" class="peer" />
+        <span class="px-3 py-1 rounded border border-slate-300 dark:border-slate-700 peer-checked:bg-slate-200 dark:peer-checked:bg-slate-800">Step 3</span>
+      </label>
+      <label class="inline-flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="step" value="4" class="peer" />
+        <span class="px-3 py-1 rounded border border-slate-300 dark:border-slate-700 peer-checked:bg-slate-200 dark:peer-checked:bg-slate-800">Step 4</span>
+      </label>
+    </fieldset>
+
+    <!-- Demo card -->
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm bg-white/60 dark:bg-white/5 backdrop-blur">
+      <p class="mb-4 text-sm opacity-80" id="stepNote">
+        Step 1: Plain HTML button.
+      </p>
+
+      <button id="demoBtn" data-step="1" >Click me</button>
+    </div>
+
+    <!-- Tips -->
+    <div class="mt-6 text-xs opacity-70 leading-relaxed">
+      <p><strong>How to record:</strong> Switch steps above and show the button upgrading in real time.</p>
+      <p>Step 3 adds neon glow on hover. Step 4 adds a ripple click effect. Dark/Light toggle works anytime.</p>
+    </div>
+  </div>
+
+  <script>
+    // --- Theme toggle ---
+    const html = document.documentElement;
+    const toggleTheme = document.getElementById('toggleTheme');
+    toggleTheme.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      // subtle feedback
+      gsap.fromTo(document.body, { opacity: .9 }, { opacity: 1, duration: .25, ease: 'power1.out' });
+    });
+
+    // --- Elements ---
+    const demoBtn = document.getElementById('demoBtn');
+    const stepNote = document.getElementById('stepNote');
+    const stepRadios = Array.from(document.querySelectorAll('input[name="step"]'));
+
+    // Single click handler (behavior changes by step)
+    function handleClick(e) {
+      const step = +demoBtn.dataset.step || 1;
+
+      // Small GSAP tap feedback from Step 2 onwards
+      if (step >= 2) {
+        gsap.fromTo(demoBtn, { scale: 0.97 }, { scale: 1, duration: 0.18, ease: 'power2.out' });
+      }
+
+      // Step 4: Ripple
+      if (step >= 4) {
+        const rect = demoBtn.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const ink = document.createElement('span');
+        ink.className = 'ripple-ink';
+        const size = Math.max(rect.width, rect.height) * 1.2;
+        ink.style.width = ink.style.height = size + 'px';
+        ink.style.left = x + 'px';
+        ink.style.top = y + 'px';
+        demoBtn.appendChild(ink);
+
+        // Clean up after animation
+        ink.addEventListener('animationend', () => ink.remove());
+      }
+    }
+
+    demoBtn.addEventListener('click', handleClick);
+
+    // Apply classes/content for each step
+    function applyStep(step) {
+      demoBtn.dataset.step = String(step);
+
+      if (step === 1) {
+        stepNote.textContent = 'Step 1: Plain HTML button.';
+        demoBtn.className = '';         // no Tailwind yet
+        demoBtn.textContent = 'Click me';
+        demoBtn.disabled = false;
+      }
+
+      if (step === 2) {
+        stepNote.textContent = 'Step 2: Tailwind styled button (padding, color, rounded, hover).';
+        demoBtn.className =
+          'px-5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 ' +
+          'bg-slate-900 text-white dark:bg-white dark:text-slate-900 ' +
+          'hover:opacity-90 transition';
+        demoBtn.textContent = 'Styled Button';
+      }
+
+      if (step === 3) {
+        stepNote.textContent = 'Step 3: Neon glow on hover.';
+        demoBtn.className =
+          'px-6 py-2 rounded-lg border ' +
+          'border-cyan-400 text-cyan-400 bg-slate-900 dark:bg-transparent ' +
+          'hover:text-cyan-300 transition neon-hover';
+        demoBtn.textContent = 'Neon Hover';
+      }
+
+      if (step === 4) {
+        stepNote.textContent = 'Step 4: Ripple effect on click (keeps neon hover).';
+        demoBtn.className =
+          'px-6 py-2 rounded-lg border ripple-root ' +
+          'border-cyan-400 text-cyan-400 bg-slate-900 dark:bg-transparent ' +
+          'hover:text-cyan-300 transition neon-hover';
+        demoBtn.textContent = 'Neon + Ripple';
+      }
+    }
+
+    // Init & listen for step changes
+    applyStep(1);
+    stepRadios.forEach(r => r.addEventListener('change', (e) => applyStep(+e.target.value)));
+  </script>
+</body>
+</html>
