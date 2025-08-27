@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Liquid Glass Card — Tailwind + GSAP</title>
+
+  <!-- Tailwind CDN: configure before loading -->
+  <script>
+    tailwind = undefined;
+    tailwind_config = undefined;
+    tailwind = window.tailwind || {};
+    tailwind.config = { darkMode: 'class' };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    /* core visuals (kept small; most layout via Tailwind) */
+    body { background: radial-gradient(1200px 600px at 10% 10%, #071025 0%, #02030a 30%, #000000 100%); }
+
+    /* subtle noise/texture (optional) */
+    .glass {
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      backdrop-filter: blur(10px) saturate(120%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* neon edge glow */
+    .neon-edge {
+      box-shadow: 0 6px 20px rgba(20, 200, 220, 0.08), inset 0 0 40px rgba(100,130,255,0.03);
+      border-radius: 18px;
+    }
+
+    /* SVG blob style */
+    .blob { filter: url(#goo); mix-blend-mode: screen; opacity: 0.7; }
+
+    /* content reveal helpers */
+    .content-hidden { opacity: 0; transform: translateY(12px) scale(.98); }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-8">
+
+  <!-- Card wrapper -->
+  <div id="cardWrap" class="relative w-[360px] max-w-full">
+    <!-- floating background glow -->
+    <div class="absolute inset-0 pointer-events-none -z-10">
+      <div class="absolute -left-20 -top-20 w-[420px] h-[420px] rounded-full bg-gradient-to-tr from-[#00f6ff]/20 to-[#a36bff]/14 blur-3xl opacity-60"></div>
+    </div>
+
+    <!-- Liquid glass card -->
+    <div id="card" class="glass neon-edge relative overflow-hidden rounded-xl w-full h-[500px] p-6 flex flex-col items-center justify-center">
+      <!-- SVG goo filter + animated blobs -->
+      <svg class="absolute inset-0 w-full h-full -z-10" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <!-- gooey filter -->
+          <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+            <feColorMatrix in="blur" mode="matrix"
+              values="1 0 0 0 0
+                      0 1 0 0 0
+                      0 0 1 0 0
+                      0 0 0 24 -7" result="goo" />
+            <feBlend in="SourceGraphic" in2="goo" />
+          </filter>
+
+          <!-- subtle radial gradient used for blobs -->
+          <radialGradient id="g1" cx="50%" cy="35%">
+            <stop offset="0%" stop-color="#00f6ff" stop-opacity="0.85"/>
+            <stop offset="50%" stop-color="#7b61ff" stop-opacity="0.75"/>
+            <stop offset="100%" stop-color="#ff6bd6" stop-opacity="0.15"/>
+          </radialGradient>
+        </defs>
+
+        <!-- blobs; we'll animate 'd' or transform via GSAP -->
+        <g id="blobs" class="blob" transform="translate(0,0)">
+          <path id="blob1" fill="url(#g1)" opacity="0.9" d="M150 120C190 60 320 40 380 110C440 180 420 300 330 340C240 380 140 340 90 270C40 200 80 180 150 120Z"></path>
+          <path id="blob2" fill="#00ffd1" opacity="0.12" d="M420 420C460 360 540 340 580 410C620 480 600 560 520 600C440 640 340 610 300 540C260 470 300 460 420 420Z"></path>
+          <path id="blob3" fill="#8a7bff" opacity="0.10" d="M40 520C80 460 160 440 220 510C280 580 260 700 180 740C100 780 0 750 -20 680C-40 610 0 580 40 520Z"></path>
+        </g>
+      </svg>
+
+      <!-- Card main content -->
+      <div id="mainContent" class="relative z-10 w-full text-center px-4">
+        <h3 id="title" class="text-2xl font-extrabold tracking-wide text-white drop-shadow-md">Liquid Glass</h3>
+        <p id="subtitle" class="mt-2 text-sm text-slate-200/80">Interactive glassmorphism card with liquid blobs & 3D tilt</p>
+
+        <!-- hidden details revealed on hover -->
+        <div id="details" class="mt-6 w-full content-hidden">
+          <p class="text-xs text-slate-100/80 mb-4">Hover the card to reveal effects. Click the button to trigger micro-interaction.</p>
+          <div class="flex items-center justify-center gap-3">
+            <button id="cta" class="px-5 py-2 rounded-md text-sm font-semibold bg-white/10 border border-white/20 text-white backdrop-blur hover:scale-[1.02] transition">View Code</button>
+            <button id="mini" class="px-4 py-2 rounded-md text-sm bg-cyan-400/90 text-black font-semibold">Try Me</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- subtle corner highlights -->
+      <div class="absolute -left-6 -top-6 w-32 h-32 rounded-full bg-white/5 blur-2xl pointer-events-none"></div>
+      <div class="absolute -right-8 -bottom-8 w-36 h-36 rounded-full bg-purple-500/6 blur-2xl pointer-events-none"></div>
+    </div>
+  </div>
+
+  <!-- Script: GSAP interactions -->
+  <script>
+    const card = document.getElementById('card');
+    const blobs = {
+      b1: document.getElementById('blob1'),
+      b2: document.getElementById('blob2'),
+      b3: document.getElementById('blob3'),
+    };
+    const details = document.getElementById('details');
+    const title = document.getElementById('title');
+    const subtitle = document.getElementById('subtitle');
+    const cta = document.getElementById('cta');
+
+    // --- 3D tilt on mouse move (smooth with gsap) ---
+    function handleMove(e) {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width; // 0..1
+      const y = (e.clientY - rect.top) / rect.height; // 0..1
+      const rotY = (x - 0.5) * 18; // degrees
+      const rotX = (0.5 - y) * 14; // degrees
+      gsap.to(card, { rotationY: rotY, rotationX: rotX, transformPerspective: 900, transformOrigin: "center", duration: 0.45, ease: "power3.out" });
+
+      // small parallax for blobs
+      gsap.to(blobs.b1, { x: (x - 0.5) * 40, y: (y - 0.5) * 30, scale: 1.03, duration: 0.6, ease: "power2.out" });
+      gsap.to(blobs.b2, { x: (x - 0.5) * -30, y: (y - 0.5) * -20, scale: 1.02, duration: 0.6, ease: "power2.out" });
+      gsap.to(blobs.b3, { x: (x - 0.5) * 20, y: (y - 0.5) * -10, scale: 1.01, duration: 0.6, ease: "power2.out" });
+    }
+
+    function handleLeave() {
+      gsap.to(card, { rotationY: 0, rotationX: 0, duration: 0.7, ease: "power3.out" });
+      gsap.to([blobs.b1, blobs.b2, blobs.b3], { x: 0, y: 0, scale: 1, duration: 0.9, ease: "elastic.out(1,0.6)" });
+    }
+
+    card.addEventListener('mousemove', handleMove);
+    card.addEventListener('mouseleave', handleLeave);
+
+    // --- hover timeline: reveal content & intensify blobs ---
+    const hoverTl = gsap.timeline({ paused: true });
+    hoverTl.to(details, { autoAlpha: 1, opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'power2.out', onStart: () => details.style.display = 'block' }, 0);
+    hoverTl.to([blobs.b1, blobs.b2, blobs.b3], { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0);
+    hoverTl.to(title, { scale: 1.02, duration: 0.45, ease: 'power2.out' }, 0);
+    hoverTl.to(card, { boxShadow: '0 20px 60px rgba(34,211,238,0.08)', duration: 0.45 }, 0);
+
+    card.addEventListener('mouseenter', () => {
+      // set details visible for animation
+      gsap.set(details, { display: 'block' });
+      hoverTl.play();
+      // gentle blob morph-ish motion loop while hovered
+      startBlobLoop();
+    });
+
+    card.addEventListener('mouseleave', () => {
+      hoverTl.reverse();
+      stopBlobLoop();
+    });
+
+    // --- blob subtle auto motion (loop) ---
+    let blobLoop;
+    function startBlobLoop() {
+      if (blobLoop) return;
+      blobLoop = gsap.to(blobs.b1, { duration: 2.6, rotation: 2, yoyo: true, repeat: -1, x: '+=18', y: '+=10', ease: 'sine.inOut' });
+      gsap.to(blobs.b2, { duration: 3.2, rotation: -2, yoyo:true, repeat:-1, x: '-=22', y: '-=12', ease:'sine.inOut' });
+      gsap.to(blobs.b3, { duration: 4.2, rotation: 1.5, yoyo:true, repeat:-1, x: '+=10', y: '-=6', ease:'sine.inOut' });
+    }
+    function stopBlobLoop() {
+      if (!blobLoop) return;
+      gsap.killTweensOf([blobs.b1, blobs.b2, blobs.b3]);
+      blobLoop = null;
+      // reset handled on mouseleave
+    }
+
+    // --- CTA micro-interaction ---
+    cta.addEventListener('click', () => {
+      gsap.fromTo(cta, { scale: 0.95 }, { scale: 1.05, duration: 0.18, yoyo: true, repeat: 1, ease: 'power1.out' });
+      // small ripple-like flash
+      gsap.to(card, { boxShadow: '0 30px 80px rgba(124, 58, 237, 0.12)', duration: 0.3, yoyo:true, repeat:1, ease:'power1.out' });
+    });
+
+    // --- accessibility: enable touch support for mobile tilt (use touches) ---
+    card.addEventListener('touchmove', (ev) => {
+      if (!ev.touches || ev.touches.length === 0) return;
+      const t = ev.touches[0];
+      handleMove({ clientX: t.clientX, clientY: t.clientY });
+    });
+    card.addEventListener('touchend', handleLeave);
+
+    // --- initial gentle breathing / idle animation ---
+    gsap.fromTo([title, subtitle], { y: 6, opacity: 0.98 }, { y: 0, opacity: 1, duration: 1.2, stagger: 0.08, ease: 'power2.out' });
+
+    // hide details initially (so CSS fallback OK)
+    gsap.set(details, { autoAlpha: 0, y: 12, scale: 0.98 });
+    gsap.set([blobs.b1, blobs.b2, blobs.b3], { opacity: 0.75 });
+  </script>
+</body>
+</html>
