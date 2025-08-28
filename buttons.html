@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button</title>
+     <link rel="stylesheet" href="./output.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<!--<body class="m-6 flex items-center justify-center p-4 bg-gray-800">
+    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 hover:scale-105 transition transform duration-200 ease-in-out flex items-center cursor-pointer">
+       Click Me
+    </button>-->
+ 
+
+
+  <style>
+    .gradient-border {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      padding: 2px;
+    }
+    .gradient-border::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        from 0deg,
+        #ff00ff,
+        #00ffff,
+        #ffcc00,
+        #ff00ff
+      );
+      animation: rotate 3s linear infinite;
+      z-index: 0;
+    }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .gradient-border span {
+      position: relative;
+      z-index: 1;
+      display: block;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 12px 24px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 flex flex-col gap-6 items-center justify-center min-h-screen">
+
+  <!-- Button 1 -->
+  <div class="gradient-border">
+    <span class="btn btn-1">Glow Border</span>
+  </div>
+
+  <!-- Button 2 -->
+  <button class="btn-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">Gradient Fill</button>
+
+  <!-- Button 3 -->
+  <button class="btn-3 bg-white text-black px-6 py-3 rounded-xl shadow-md hover:bg-gray-100 relative overflow-hidden">
+    <span class="absolute inset-0 bg-gradient-to-r from-blue-500 to-green-400 opacity-0 hover:opacity-20 transition-all duration-300"></span>
+    Frosted Glass
+  </button>
+
+  <!-- Button 4 -->
+  <button class="btn-4 bg-black text-white px-6 py-3 rounded-lg border border-gray-600 hover:border-pink-500 hover:text-pink-400 transition-all duration-300">
+    Neon Hover
+  </button>
+
+  <!-- Button 5 -->
+  <button class="btn-5 relative px-6 py-3 text-white rounded-lg bg-gray-800 overflow-hidden">
+    <span class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 hover:opacity-100 transition-opacity duration-500"></span>
+    <span class="relative z-10">Shimmer</span>
+  </button>
+
+<script>
+  // GSAP Hover Animations
+  document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('mouseenter', () => {
+      gsap.to(button, { scale: 1.1, duration: 0.2 });
+    });
+    button.addEventListener('mouseleave', () => {
+      gsap.to(button, { scale: 1, duration: 0.2 });
+    });
+  });
+</script>
+
+</body>
+</html>
