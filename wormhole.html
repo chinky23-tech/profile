@@ -7,17 +7,61 @@
     <link rel="stylesheet" href="./output.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .card{
+            background-image: linear-gradient(to bottom, #1e2939 80% , rgb(152, 60, 18));
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+    </style>
 
    </head>
- <body class="min-h-screen flex items-center justify-center p-4">
-    <div class="card-container rounded-4xl overflow-hidden border border-orange-800 p-2 ">
-    <div class="card w-80 h-78  rounded-4xl shadow-lg overflow-hidden cursor-pointer bg-gradient-to-b from-gray-800 via-gray-800 to-orange-800 border-2 border-orange-800 ">
 
-        <div class="card-content p-6">
-            <h2 class="text-2xl font-bold mb-2">Interactive Card</h2>
-            <p class="text-white">Hover over this card to see the animation effect.</p>
+<body class="min-h-screen flex items-center justify-center p-4 bg-gray-800" >
+    <div class="card-container rounded-3xl overflow-hidden border border-orange-800 p-2">
+    <div class="card w-80 h-72 rounded-3xl shadow-lg overflow-hidden cursor-pointer  border-2 border-orange-800 ">
+<div class="relative inset-0 flex items-center justify-center ">
+    <button class="bg-white text-black p-2 border border-orange-600 rounded-lg m-6">mistake</button>
+</div>
+        <div class="card-content p-6 text-center">
+            <h2 class="text-white text-2xl font-bold mb-2">Don't Be a Perfectionist</h2>
+            <p class="text-white">Perfectionism is the enemy of productivity and efficiency.</p>
         </div>
         </div>
+        </div>
+        <script>
+            const card = document.querySelector('.card,.card-container');
+            card.addEventListener('mousemove',(e) =>{
+         let rect = card.getBoundingClientRect();
+         let x = e.clientX - rect.left;
+         let y = e.clientY - rect.top;
 
+         let centerX = rect.width /2;
+         let centerY = rect.height /2;
 
-  
+         let rotateX = ((y -centerY) / centerY) * 15;
+         let rotateY = ((x- centerX) / centerX) * 15;
+            
+         gsap.to(card,{
+            rotationX: -rotateX,
+            rotationY: rotateY,
+            transformPerspective: 1000,
+            ease: "power1.out",
+            duration:0.3
+         });
+            });
+            card.addEventListener('mouseleave',()=>{
+gsap.to(card,{
+rotationX:0,
+rotationY:0,
+duration:0.5,
+ease:"power1.out"
+});
+            });
+        
+           
+  </script>
+</body>
+</html>
+
